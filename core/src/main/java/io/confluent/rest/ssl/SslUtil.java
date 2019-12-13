@@ -137,4 +137,69 @@ public class SslUtil {
     return sslContextFactory;
   }
 
+  public static SslContextFactory createSslContextFactoryClient(RestConfig config) {
+    SslContextFactory sslContextFactory = new SslContextFactory.Client();
+    if (!config.getString(RestConfig.SSL_KEYSTORE_LOCATION_CONFIG).isEmpty()) {
+      sslContextFactory.setKeyStorePath(
+          config.getString(RestConfig.SSL_KEYSTORE_LOCATION_CONFIG)
+      );
+      sslContextFactory.setKeyStorePassword(
+          config.getPassword(RestConfig.SSL_KEYSTORE_PASSWORD_CONFIG).value()
+      );
+      sslContextFactory.setKeyManagerPassword(
+          config.getPassword(RestConfig.SSL_KEY_PASSWORD_CONFIG).value()
+      );
+      sslContextFactory.setKeyStoreType(
+          config.getString(RestConfig.SSL_KEYSTORE_TYPE_CONFIG)
+      );
+
+      if (!config.getString(RestConfig.SSL_KEYMANAGER_ALGORITHM_CONFIG).isEmpty()) {
+        sslContextFactory.setKeyManagerFactoryAlgorithm(
+            config.getString(RestConfig.SSL_KEYMANAGER_ALGORITHM_CONFIG));
+      }
+    }
+
+    configureClientAuth(sslContextFactory, config);
+
+    List<String> enabledProtocols = config.getList(RestConfig.SSL_ENABLED_PROTOCOLS_CONFIG);
+    if (!enabledProtocols.isEmpty()) {
+      sslContextFactory.setIncludeProtocols(enabledProtocols.toArray(new String[0]));
+    }
+
+    List<String> cipherSuites = config.getList(RestConfig.SSL_CIPHER_SUITES_CONFIG);
+    if (!cipherSuites.isEmpty()) {
+      sslContextFactory.setIncludeCipherSuites(cipherSuites.toArray(new String[0]));
+    }
+
+    sslContextFactory.setEndpointIdentificationAlgorithm(
+        config.getString(RestConfig.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG));
+
+    if (!config.getString(RestConfig.SSL_TRUSTSTORE_LOCATION_CONFIG).isEmpty()) {
+      sslContextFactory.setTrustStorePath(
+          config.getString(RestConfig.SSL_TRUSTSTORE_LOCATION_CONFIG)
+      );
+      sslContextFactory.setTrustStorePassword(
+          config.getPassword(RestConfig.SSL_TRUSTSTORE_PASSWORD_CONFIG).value()
+      );
+      sslContextFactory.setTrustStoreType(
+          config.getString(RestConfig.SSL_TRUSTSTORE_TYPE_CONFIG)
+      );
+
+      if (!config.getString(RestConfig.SSL_TRUSTMANAGER_ALGORITHM_CONFIG).isEmpty()) {
+        sslContextFactory.setTrustManagerFactoryAlgorithm(
+            config.getString(RestConfig.SSL_TRUSTMANAGER_ALGORITHM_CONFIG)
+        );
+      }
+    }
+
+    sslContextFactory.setProtocol(config.getString(RestConfig.SSL_PROTOCOL_CONFIG));
+    if (!config.getString(RestConfig.SSL_PROVIDER_CONFIG).isEmpty()) {
+      sslContextFactory.setProtocol(config.getString(RestConfig.SSL_PROVIDER_CONFIG));
+    }
+
+    sslContextFactory.setRenegotiationAllowed(false);
+
+    return sslContextFactory;
+  }
+
 }
